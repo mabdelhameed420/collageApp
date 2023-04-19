@@ -14,7 +14,11 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
-        $schedule->command('user:expire')->everyMinute();
+        // $schedule->command('user:expire')->everyMinute();
+
+        // git user's emails 
+        $schedule->command('notify:email')->daily();
+
     }
 
     /**
@@ -27,5 +31,7 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
 
         \App\Console\Commands\Expiration::class;
+
+        \App\Console\Commands\Notify::class;
     }
 }

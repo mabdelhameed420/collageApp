@@ -79,3 +79,13 @@ Route::get('callback/{services}', 'socialController@callback');
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::group(['namespace'=>'DBcontroller','prefix'=>'offers'],function () {
+
+    Route::get('create','OfferController@create');
+
+    Route::post('store','OfferController@store')->name('offers.store');
+    
+    Route::get('getall','OfferController@getAllOffers');
+
+});
