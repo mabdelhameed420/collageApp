@@ -3,6 +3,7 @@
 use App\Http\Controllers\NewsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,12 +81,18 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::group(['namespace'=>'DBcontroller','prefix'=>'offers'],function () {
 
-    Route::get('create','OfferController@create');
+// routes/web.php
 
-    Route::post('store','OfferController@store')->name('offers.store');
-    
-    Route::get('getall','OfferController@getAllOffers');
+Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']], function () {
+    Route::group(['namespace' => 'DBcontroller', 'prefix' => 'offers'], function () {
 
+        Route::get('create', 'OfferController@create');
+
+        Route::post('store', 'OfferController@store')->name('offers.store');
+
+        Route::get('getall', 'OfferController@getAllOffers');
+    });
 });
+
+/** OTHER PAGES THAT SHOULD NOT BE LOCALIZED **/
