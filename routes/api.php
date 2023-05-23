@@ -177,4 +177,4 @@ Route::group(['prefix' => 'question', 'namespace' => 'Api\Quiz'], function () {
 });
 
 //? 15==>================= rating ======================
-Route::post('/rating/add', 'RatingController@store')->namespace('Api\Quiz');
+Route::namespace()->post('/rating/add', 'RatingController@store');

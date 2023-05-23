@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Traits\GeneralTraits;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
@@ -24,7 +26,7 @@ class AdminController extends Controller
         ]);
 
         $admin->update($validatedData);
-        return $this->returnData('admin_update',$admin,"admin updated successfully");
+        return $this->returnData('admin_update', $admin, "admin updated successfully");
     }
     public function delete(Request $request)
     {
@@ -42,20 +44,25 @@ class AdminController extends Controller
     public function index()
     {
         $admins = Admin::all();
-        return $this->returnData('admins',$admins,"Admin found successfully");
+        return $this->returnData('admins', $admins, "Admin found successfully");
     }
 
     public function login(Request $request)
     {
-        $adminExists = Admin::where('national_id', $request->national_id)->first();
-        if ($adminExists) {
-            if (password_verify($request->password, $adminExists->password)) {
-                return $this->returnData('admin_login',$adminExists,"Admin login successfully");
-            } else {
-                return $this->returnError("","Wrong password");
-            }
+        $validation = Validator::make($request->all(), [
+            'national_id' => 'required',
+            'password' => 'required'
+        ]);
+        if ($validation->fails()) {
+            return $this->returnValidationError("E001", $validation);
         } else {
-            return $this->returnError("","Admin don't exists");
+            $credentials = request()->only('national_id', 'password');
+            $admin = Admin::where('national_id', $request->national_id)->first();
+            if (auth('api-admins')->attempt($credentials)) {
+                return $this->returnData('admin_login', $admin, "Admin login successfully");
+            } else {
+                return $this->returnError("", "Admin don't exists");
+            }
         }
     }
 }
