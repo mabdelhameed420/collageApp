@@ -7,8 +7,13 @@ use App\Models\StudentAffair;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class StudentAffairController extends Controller
-{
+class StudentAffairController extends Controller{
+
+    public function __construct()
+    {
+        $this->middleware('checkToken', ['except' => ['login']]);
+    }
+
     public function index()
     {
         $studentAffairs = StudentAffair::all();
@@ -133,27 +138,13 @@ class StudentAffairController extends Controller
     }
     public function login(Request $request)
     {
-        $studentAffair = StudentAffair::where('national_id', $request->national_id)->first();
-        if ($studentAffair) {
-            if (password_verify($request->password, $studentAffair->password)) {
-                return response()->json([
-                    'message' => 'Student Affairs found successfully.',
-                    'data' => $studentAffair,
-                    'statue' => 200
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Password is incorrect.',
-                    'data' => null,
-                    'statue' => 400
-                ], 400);
-            }
+        $credentials = request()->only('national_id', 'password');
+        if (!$token = auth('api-student')->attempt($credentials)) {
+            return $this->returnError("401","Unauthorized");
         } else {
-            return response()->json([
-                'message' => 'National ID is incorrect.',
-                'data' => null,
-                'statue' => 400
-            ], 400);
+            $studentAffair = StudentAffair::where('national_id', $request->national_id)->first();
+            $studentAffair->api_token = $token;
+            return $this->returnData('Affairs_login', $studentAffair, "Student affair login successfully");
         }
     }
     public function getAllStudentAffairs()
@@ -207,5 +198,11 @@ class StudentAffairController extends Controller
                 'statue' => 400
             ], 400);
         }
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+        return $this->returnSuccessMessage('Successfully logged out');
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Department;
 use App\Models\Chat;
 use App\Models\Comment;
@@ -11,10 +10,12 @@ use App\Models\CommentReply;
 use App\Models\Course;
 use App\Models\Post;
 use App\Models\Quiz;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 
-
-class Lecturer extends Model
+class Lecturer extends Authenticatable implements JWTSubject
 {
     use HasFactory;
 
@@ -64,5 +65,29 @@ class Lecturer extends Model
     public function classroom()
     {
         return $this->hasMany(Classroom::class);
+    }
+    
+    use Notifiable;
+
+    // Rest omitted for brevity
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

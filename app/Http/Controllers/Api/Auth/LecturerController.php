@@ -13,6 +13,12 @@ use App\Traits\GeneralTraits;
 class LecturerController extends Controller
 {
     use GeneralTraits;
+
+    public function __construct()
+    {
+        $this->middleware('checkToken', ['except' => ['login']]);
+    }
+
     public function index()
     {
         $lecturers = Lecturer::with('department')->get();
@@ -99,18 +105,13 @@ class LecturerController extends Controller
     }
     public function login(Request $request)
     {
-        $lecturer = Lecturer::where('national_id', $$request->national_id)->first();
-        if ($lecturer) {
-            if (password_verify($request->password, $lecturer->password)) {
-                $department = Department::find($lecturer->department_id);
-                $lecturer->department_name = $department->name;
-                $lecturer->department_level = $department->level;
-                return $this->returnData('lecturer',$lecturer,'login successfully');;
-            } else {
-                return $this->returnError('','wrong password');;
-            }
+        $credentials = request()->only('national_id', 'password');
+        if (!$token = auth('api-lecturers')->attempt($credentials)) {
+            return $this->returnError("401","Unauthorized");
         } else {
-            return $this->returnError('',"lecturer don't exists");
+            $lecturer = Lecturer::where('national_id', $$request->national_id)->first();
+            $lecturer->api_token = $token;
+            return $this->returnData('lecturer_login', $lecturer, "lecturer login successfully");
         }
     }
     public function getLecturerById(Request $request)
@@ -145,5 +146,11 @@ class LecturerController extends Controller
             'statue' => 200
 
         ]);
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+        return $this->returnSuccessMessage('Successfully logged out');
     }
 }

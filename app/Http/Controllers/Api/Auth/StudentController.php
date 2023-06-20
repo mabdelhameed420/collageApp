@@ -11,6 +11,11 @@ use App\Models\Department;
 class StudentController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('checkToken', ['except' => ['login']]);
+    }
+
     public function store(Request $request)
     {
         $studentExists = Student::where('national_id', $request->national_id)->first();
@@ -80,28 +85,18 @@ class StudentController extends Controller
             'data' => $student
         ], 201);
     }
+
     public function login(Request $request)
     {
-        $student = Student::where('national_id', $request->national_id)->first();
-        if ($student) {
-            if (password_verify($request->password, $student->password)) {
-                $department = Department::find($student->department_id);
-                $student->department_name = $department->name;
-                return response()->json([
-                    'message' => 'Login successful!',
-                    'data' => $student
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Login failed!',
-                    'data' => $student
-                ], 400);
-            }
+        $credentials = request()->only('national_id', 'password');
+        if (!$token = auth('api-admins')->attempt($credentials)) {
+            return $this->returnError("401", "Unauthorized");
         } else {
-            return response()->json([
-                'message' => 'Login failed!',
-                'data' => $student
-            ], 400);
+            $student = Student::where('national_id', $request->national_id)->first();
+            $department = Department::find($student->department_id);
+            $student->department_name = $department->name;
+            $student->api_token = $token;
+            return $this->returnData('student_login', $student, "student login successfully");
         }
     }
     // Get all students by department ID and course ID
@@ -113,5 +108,11 @@ class StudentController extends Controller
             'data' => $students,
             'statue' => 200
         ]);
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+        return $this->returnSuccessMessage('Successfully logged out');
     }
 }

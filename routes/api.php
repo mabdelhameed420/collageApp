@@ -26,6 +26,7 @@ Route::group(['prefix' => 'student-affairs', 'namespace' => 'Api\Auth'], functio
     Route::post('add', 'StudentAffairController@store');
     Route::post('update', 'StudentAffairController@update');
     Route::post('login', 'StudentAffairController@login');
+    Route::get('logout', 'StudentAffairController@logout');
     Route::get('all', 'StudentAffairController@getAllStudentAffairs');
     Route::delete('delete', 'StudentAffairController@delete');
 });
@@ -37,6 +38,7 @@ Route::group(['prefix' => 'student', 'namespace' => 'Api\Auth'], function () {
     Route::post('delete', 'StudentController@delete');
     Route::get('get', 'StudentController@index');
     Route::post('login', 'StudentController@login');
+    Route::post('logout', 'StudentController@logout');
     Route::get('getAllStudentByDepartmentId', 'StudentController@getAllStudentByDepartmentId');
 });
 
@@ -48,6 +50,7 @@ Route::group(['prefix' => 'lecturer', 'namespace' => 'Api\Auth'], function () {
     Route::post('delete', 'LecturerController@delete');
     Route::get('get', 'LecturerController@index');
     Route::get('login', 'LecturerController@login');
+    Route::get('logout', 'LecturerController@logout');
     Route::get('getLecturersById', 'LecturerController@getLecturerById');
     Route::get('getClassroomByLecturerId', 'LecturerController@getClassroomByLecturerId');
 });
@@ -107,10 +110,11 @@ Route::group(['prefix' => 'message', 'namespace' => 'Api\Message'], function () 
 //? 8==>================= Admin ====================
 Route::group(['prefix' => 'admin', 'namespace' => 'Api\Auth'], function () {
 
-    Route::post('update', 'AdminController@update');
-    Route::post('delete', 'AdminController@delete');
+    Route::put('update', 'AdminController@update');
+    Route::delete('delete', 'AdminController@delete');
     Route::get('get', 'AdminController@index');
     Route::post('login', 'AdminController@login');
+    Route::post('logout', 'AdminController@logout');
 });
 
 //? 9==>================= classroom ====================

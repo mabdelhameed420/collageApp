@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Traits\GeneralTraits;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
     use GeneralTraits;
+
+    public function __construct()
+    {
+        $this->middleware('checkToken', ['except' => ['login']]);
+    }
 
     public function update(Request $request, Admin $admin)
     {
@@ -49,20 +53,19 @@ class AdminController extends Controller
 
     public function login(Request $request)
     {
-        $validation = Validator::make($request->all(), [
-            'national_id' => 'required',
-            'password' => 'required'
-        ]);
-        if ($validation->fails()) {
-            return $this->returnValidationError("E001", $validation);
+        $credentials = request()->only('national_id', 'password');
+        if (!$token = auth('api-admins')->attempt($credentials)) {
+            return $this->returnError("401","Unauthorized");
         } else {
-            $credentials = request()->only('national_id', 'password');
             $admin = Admin::where('national_id', $request->national_id)->first();
-            if (auth('api-admins')->attempt($credentials)) {
-                return $this->returnData('admin_login', $admin, "Admin login successfully");
-            } else {
-                return $this->returnError("", "Admin don't exists");
-            }
+            $admin->admin_token = $token;
+            return $this->returnData('admin_login', $admin, "Admin login successfully");
         }
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+        return $this->returnSuccessMessage('Successfully logged out');
     }
 }

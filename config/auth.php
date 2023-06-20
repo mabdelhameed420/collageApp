@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'api-admins',
+        'guard' => 'web',
         'passwords' => 'users',
     ],
 
@@ -41,8 +41,20 @@ return [
             'provider' => 'users',
         ],
         'api-admins' => [
-            'driver' => 'session',
+            'driver' => 'jwt',
             'provider' => 'admins',
+        ],
+        'api-lecturers' => [
+            'driver' => 'jwt',
+            'provider' => 'lecturers',
+        ],
+        'api-students' => [
+            'driver' => 'jwt',
+            'provider' => 'students',
+        ],
+        'api-affairs' => [
+            'driver' => 'jwt',
+            'provider' => 'student_affairs',
         ],
     ],
 
