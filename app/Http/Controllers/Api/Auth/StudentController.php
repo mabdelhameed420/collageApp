@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Department;
-
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('checkToken', ['except' => ['login']]);
+        $this->middleware('checkToken:api-students', ['except' => ['login']]);
     }
 
     public function store(Request $request)
@@ -89,7 +89,8 @@ class StudentController extends Controller
     public function login(Request $request)
     {
         $credentials = request()->only('national_id', 'password');
-        if (!$token = auth('api-admins')->attempt($credentials)) {
+        $token =Auth::guard('api-affairs')->attempt($credentials);
+        if (!$token) {
             return $this->returnError("401", "Unauthorized");
         } else {
             $student = Student::where('national_id', $request->national_id)->first();

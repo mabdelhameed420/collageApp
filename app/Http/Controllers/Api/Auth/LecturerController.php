@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Lecturer;
 use App\Models\Department;
 use App\Traits\GeneralTraits;
+use Illuminate\Support\Facades\Auth;
 
 class LecturerController extends Controller
 {
@@ -16,7 +17,7 @@ class LecturerController extends Controller
 
     public function __construct()
     {
-        $this->middleware('checkToken', ['except' => ['login']]);
+        $this->middleware('checkToken:api-lecturers', ['except' => ['login']]);
     }
 
     public function index()
@@ -106,7 +107,8 @@ class LecturerController extends Controller
     public function login(Request $request)
     {
         $credentials = request()->only('national_id', 'password');
-        if (!$token = auth('api-lecturers')->attempt($credentials)) {
+        $token =Auth::guard('api-lecturers')->attempt($credentials);
+        if (!$token) {
             return $this->returnError("401","Unauthorized");
         } else {
             $lecturer = Lecturer::where('national_id', $$request->national_id)->first();

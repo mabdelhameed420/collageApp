@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\StudentAffair;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class StudentAffairController extends Controller{
 
     public function __construct()
     {
-        $this->middleware('checkToken', ['except' => ['login']]);
+        $this->middleware('checkToken:api-affairs', ['except' => ['login','store']]);
     }
 
     public function index()
@@ -139,7 +140,8 @@ class StudentAffairController extends Controller{
     public function login(Request $request)
     {
         $credentials = request()->only('national_id', 'password');
-        if (!$token = auth('api-student')->attempt($credentials)) {
+        $token =Auth::guard('api-affairs')->attempt($credentials);
+        if (!$token) {
             return $this->returnError("401","Unauthorized");
         } else {
             $studentAffair = StudentAffair::where('national_id', $request->national_id)->first();

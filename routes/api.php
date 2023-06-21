@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //? 1==>========================Student Affairs===================
 Route::group(['prefix' => 'student-affairs', 'namespace' => 'Api\Auth'], function () {
 
-    Route::post('add', 'StudentAffairController@store');
+    Route::post('add', 'StudentAffairController@store')->middleware('checkToken:api-admins');
     Route::post('update', 'StudentAffairController@update');
     Route::post('login', 'StudentAffairController@login');
     Route::get('logout', 'StudentAffairController@logout');

@@ -5,43 +5,39 @@ namespace App\Http\Middleware;
 use App\Traits\GeneralTraits;
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Tymon\JWTAuth\Exceptions as JWTExceptions;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CheckToken
 {
+
     use GeneralTraits;
+
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @param string|null $guard
+     * @return mixed
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ?string $guard = null)
     {
-        try{
+        try {
+            if ($guard) {
+                Auth::shouldUse($guard);
+            }
+
             $user = JWTAuth::parseToken()->authenticate();
-        }catch(\Exception $e){
-            if($e instanceof JWTExceptions\TokenInvalidException){
-                return $this->returnError('E3001','Invalid_Token');
-            }elseif($e instanceof JWTExceptions\TokenExpiredException){
-                return $this->returnError('E3001','Expire_Token');
-            }else{
-                return $this->returnError('E3001','Token_NotFound');
-            }
-        }catch(\Throwable $e){
-            if($e instanceof JWTExceptions\TokenInvalidException){
-                return $this->returnError('E3001','Invalid_Token');
-            }elseif($e instanceof JWTExceptions\TokenExpiredException){
-                return $this->returnError('E3001','Expire_Token');
-            }else{
-                return $this->returnError('E3001','Token_NotFound');
-            }
+        } catch (JWTException $e) {
+            return $this->returnError(401,'invalid token');
         }
 
-        if(!$user)
-            return $this->returnError('E3000',trans('Unauthenticated'));
-            
+        if (!$user) {
+            return $this->returnError(401,'invalid token');
+        }
+
         return $next($request);
     }
 }

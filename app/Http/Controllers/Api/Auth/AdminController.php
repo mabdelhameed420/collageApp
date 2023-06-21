@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Traits\GeneralTraits;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -14,7 +15,7 @@ class AdminController extends Controller
 
     public function __construct()
     {
-        $this->middleware('checkToken', ['except' => ['login']]);
+        $this->middleware('checkToken:api-admins', ['except' => ['login']]);
     }
 
     public function update(Request $request, Admin $admin)
@@ -54,7 +55,8 @@ class AdminController extends Controller
     public function login(Request $request)
     {
         $credentials = request()->only('national_id', 'password');
-        if (!$token = auth('api-admins')->attempt($credentials)) {
+        $token =Auth::guard('api-admins')->attempt($credentials);
+        if (!$token) {
             return $this->returnError("401","Unauthorized");
         } else {
             $admin = Admin::where('national_id', $request->national_id)->first();
